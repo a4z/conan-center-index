@@ -46,19 +46,15 @@ class PahoMqttCppConan(ConanFile):
 
 
     def requirements(self):
-        if self.version == "1.1":
+        if tools.Version(self.version) >= "1.1":
             self.requires("paho-mqtt-c/1.3.1")
-        elif self.version == "1.0.1":
-            self.requires("paho-mqtt-c/1.3.0")
         else:
-            raise ConanInvalidConfiguration("{} requirements not implemented".format(self.version))
+            self.requires("paho-mqtt-c/1.3.0")
 
     def source(self):
         tools.get(**self.conan_data["sources"][self.version])
         extracted_dir = self.name.replace("-", ".") + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
-        for patch in self.conan_data["patches"][self.version]:
-            tools.patch(**patch)
 
     def _configure_cmake(self):
         if self._cmake:
@@ -73,9 +69,8 @@ class PahoMqttCppConan(ConanFile):
         return self._cmake
 
     def build(self):
-        c_async = self.options["paho-mqtt-c"].asynchronous
-        use_ssl = self.options.ssl 
-        b_shared = self.options.shared
+        for patch in self.conan_data["patches"][self.version]:
+            tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
 
