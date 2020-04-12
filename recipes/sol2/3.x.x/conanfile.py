@@ -11,8 +11,7 @@ class Sol2Conan(ConanFile):
     topics = ("conan", "lua", "c++", "bindings")
     settings = "os", "compiler"
     license = "MIT"
-    requires = ["lua/5.3.5"]    
-    default_options = {"lua:compile_as_cpp": True}
+    requires = ["lua/5.3.5"]
     
     _source_subfolder = "source_subfolder"
     _build_subfolder = "build_subfolder"
@@ -34,36 +33,35 @@ class Sol2Conan(ConanFile):
         return self._cmake
 
 
-    def configure(self):
-        minimal_cpp_standard = "17"
-        try:
-            tools.check_min_cppstd(self, minimal_cpp_standard)
-        except ConanInvalidConfiguration:
-            raise
-        except ConanException:
-            # FIXME: We need to handle the case when Conan doesn't know
-            # about a user defined compiler's default standard version
-            self.output.warn(
-                "Unnable to determine the default standard version of the compiler")
+    def _has_support_for_cpp17(self):
+        supported_compilers = [("apple-clang", 10), ("clang", 6), ("gcc", 7), ("Visual Studio", 15.7)]
+        compiler, version = self.settings.compiler, tools.Version(self.settings.compiler.version)
+        return any(compiler == sc[0] and version >= sc[1] for sc in supported_compilers)
 
-    def build(self):
-        cmake = self._configure_cmake()
-        cmake.build()
+    def configure(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            tools.check_min_cppstd(self, "17")
+        if not self._has_support_for_cpp17():
+            raise ConanInvalidConfiguration("sol2 requires C++17 or higher support standard."
+                                            " {} {} is not supported."
+                                            .format(self.settings.compiler,
+                                                    self.settings.compiler.version))
 
     def package(self):
-    # this is buggy in < 3.2.0, and it is less work to just copy the headers, 
-    # because this is what install does. However, for future releases, leave this here    
-#        cmake = self._configure_cmake()
-#        cmake.install()
-#        tools.rmdir(os.path.join(self.package_folder, "share")) # constains just # , "pkgconfig"))
-#        tools.rmdir(os.path.join(self.package_folder, "lib" )) # constains just # , "cmake"))
-
-        self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
-        self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
         self.copy("LICENSE.txt", src=self._source_subfolder, dst="licenses")
+        #there is a bug in cmake install in 3.0.3, so handel this
+        if tools.Version(self.version) == "3.0.3":
+            self.copy("*.h", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
+            self.copy("*.hpp", src=os.path.join(self._source_subfolder, "include"), dst="include", keep_path=True)
+        else:
+            cmake = self._configure_cmake()
+            cmake.install()
+            tools.rmdir(os.path.join(self.package_folder, "share")) # constains just # , "pkgconfig"))
+            tools.rmdir(os.path.join(self.package_folder, "lib" )) # constains just # , "cmake"))
 
     def package_id(self):
         self.info.header_only()
 
-    def package_info(self):        
-        self.cpp_info.defines.append("SOL_USING_CXX_LUA=1")
+    def package_info(self): 
+        if self.options["lua"].compile_as_cpp :
+            self.cpp_info.defines.append("SOL_USING_CXX_LUA=1")
