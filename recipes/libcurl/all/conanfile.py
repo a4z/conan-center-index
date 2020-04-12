@@ -111,7 +111,7 @@ class LibcurlConan(ConanFile):
             elif self.settings.os == "Windows" and self.options.with_winssl:
                 pass
             else:
-                self.requires.add("openssl/1.1.1e")
+                self.requires.add("openssl/1.1.1f")
         if self.options.with_libssh2:
             if self.settings.compiler != "Visual Studio":
                 self.requires.add("libssh2/1.9.0")
@@ -243,6 +243,12 @@ class LibcurlConan(ConanFile):
             tools.replace_in_file("configure.ac",
                                   '-lz ',
                                   '-lzlib ')
+
+        # patch for openssl extras in mingw
+        if self.options.with_openssl:
+            tools.replace_in_file("configure",
+                                  '-lcrypto ',
+                                  '-lcrypto -lcrypt32 ')
 
         if self.options.shared:
             # patch for shared mingw build
