@@ -15,7 +15,7 @@ class MagicEnumConan(ConanFile):
         "header-only",
         "compile-time"
     )
-    url = "https://github.com/Neargye/magic_enum"
+    url = "https://github.com/conan-io/conan-center-index "
     homepage = "https://github.com/Neargye/magic_enum"
     license = "MIT"
     settings = "compiler"
@@ -29,7 +29,7 @@ class MagicEnumConan(ConanFile):
         os.rename(extracted_dir, self._source_subfolder)
 
     @property
-    def supported_compiler(self):
+    def _supported_compiler(self):
         compiler = str(self.settings.compiler)
         version = tools.Version(self.settings.compiler.version)
         if compiler == "Visual Studio" and version >= "15":
@@ -45,8 +45,9 @@ class MagicEnumConan(ConanFile):
     def configure(self):
         if self.settings.compiler.get_safe("cppstd"):
             tools.check_min_cppstd(self, "17")
-        if not self.supported_compiler:
-            raise ConanInvalidConfiguration("magic_enum: Unsupported compiler (https://github.com/Neargye/magic_enum#compiler-compatibility).")
+        if not self._supported_compiler:
+            raise ConanInvalidConfiguration("magic_enum: Unsupported compiler: {}-{} "
+                                            "(https://github.com/Neargye/magic_enum#compiler-compatibility).".format(self.settings.compiler, self.settings.compiler.version))
 
     def package(self):
         self.copy("include/*", src=self._source_subfolder)
