@@ -47,6 +47,7 @@ class BoostConan(ConanFile):
         "python_version": "ANY",  # major.minor; computed automatically, if None
         "namespace": "ANY",  # custom boost namespace for bcp, e.g. myboost
         "namespace_alias": [True, False],  # enable namespace alias for bcp, boost=myboost
+        "multithreading": [True, False],  # enables multithreading support
         "zlib": [True, False],
         "bzip2": [True, False],
         "lzma": [True, False],
@@ -73,6 +74,7 @@ class BoostConan(ConanFile):
         'python_version': 'None',
         'namespace': 'boost',
         'namespace_alias': False,
+        'multithreading': True,
         'zlib': True,
         'bzip2': True,
         'lzma': False,
@@ -105,6 +107,10 @@ class BoostConan(ConanFile):
         return self.settings.compiler == "Visual Studio"
 
     @property
+    def _is_clang_cl(self):
+        return self.settings.os == "Windows" and self.settings.compiler == "clang"
+
+    @property
     def _zip_bzip2_requires_needed(self):
         return not self.options.without_iostreams and not self.options.header_only
 
@@ -124,6 +130,15 @@ class BoostConan(ConanFile):
     def configure(self):
         if not self.options.i18n_backend and not self.options.without_locale:
             raise ConanInvalidConfiguration("Boost 'locale' library requires a i18n_backend, either 'icu' or 'iconv'")
+
+        if not self.options.multithreading:
+            # * For the reason 'thread' is deactivate look at https://stackoverflow.com/a/20991533
+            #   Look also on the comments of the answer for more details
+            # * Although the 'context' and 'atomic' library does not mention anything about threading,
+            #   when being build the compiler uses the -pthread flag, which makes it quite dangerous
+            for lib in ['locale', 'coroutine', 'wave', 'type_erasure', 'fiber', 'thread', 'context', 'atomic']:
+                if not self.options.get_safe('without_%s' % lib):
+                    raise ConanInvalidConfiguration("Boost '%s' library requires multi threading" % lib)
 
     def build_requirements(self):
         self.build_requires("b2/4.2.0")
@@ -373,7 +388,7 @@ class BoostConan(ConanFile):
                 self.run(command)
 
     def _run_bcp(self):
-        with tools.vcvars(self.settings) if self._is_msvc else tools.no_op():
+        with tools.vcvars(self.settings) if self._is_msvc or self._is_clang_cl else tools.no_op():
             with tools.chdir(self.source_folder):
                 os.mkdir(self._bcp_dir)
                 namespace = "--namespace=%s" % self.options.namespace
@@ -570,7 +585,8 @@ class BoostConan(ConanFile):
         if self._is_msvc and self.settings.compiler.runtime:
             flags.append("runtime-link=%s" % ("static" if "MT" in str(self.settings.compiler.runtime) else "shared"))
 
-        flags.append("threading=multi")
+        # For details https://boostorg.github.io/build/manual/master/index.html
+        flags.append("threading=%s" % ("single" if not self.options.multithreading else "multi" ))
 
         flags.append("link=%s" % ("static" if not self.options.shared else "shared"))
         if self.settings.build_type == "Debug":
@@ -629,8 +645,10 @@ class BoostConan(ConanFile):
                                                                     self.settings.os.version))
 
         if self.settings.os == "iOS":
-            cxx_flags.append("-DBOOST_AC_USE_PTHREADS")
-            cxx_flags.append("-DBOOST_SP_USE_PTHREADS")
+            if self.options.multithreading:
+                cxx_flags.append("-DBOOST_AC_USE_PTHREADS")
+                cxx_flags.append("-DBOOST_SP_USE_PTHREADS")
+
             cxx_flags.append("-fvisibility=hidden")
             cxx_flags.append("-fvisibility-inlines-hidden")
             cxx_flags.append("-fembed-bitcode")
@@ -710,8 +728,8 @@ class BoostConan(ConanFile):
         contents = ""
         if self._zip_bzip2_requires_needed:
             def create_library_config(deps_name, name):
-                includedir = self.deps_cpp_info[deps_name].include_paths[0].replace('\\', '/')
-                libdir = self.deps_cpp_info[deps_name].lib_paths[0].replace('\\', '/')
+                includedir = '"%s"' % self.deps_cpp_info[deps_name].include_paths[0].replace('\\', '/')
+                libdir = '"%s"' % self.deps_cpp_info[deps_name].lib_paths[0].replace('\\', '/')
                 lib = self.deps_cpp_info[deps_name].libs[0]
                 version = self.deps_cpp_info[deps_name].version
                 return "\nusing {name} : {version} : " \
@@ -743,7 +761,7 @@ class BoostConan(ConanFile):
 
         # Specify here the toolset with the binary if present if don't empty parameter :
         contents += '\nusing "%s" : %s : ' % (self._toolset, self._toolset_version)
-        contents += ' %s' % self._cxx.replace("\\", "/")
+        contents += ' "%s"' % self._cxx.replace("\\", "/")
 
         if tools.is_apple_os(self.settings.os):
             if self.settings.compiler == "apple-clang":
@@ -877,7 +895,7 @@ class BoostConan(ConanFile):
                 if not self.options.shared:
                     self.cpp_info.defines.append("BOOST_PYTHON_STATIC_LIB")
 
-            if self._is_msvc:
+            if self._is_msvc or self._is_clang_cl:
                 if not self.options.magic_autolink:
                     # DISABLES AUTO LINKING! NO SMART AND MAGIC DECISIONS THANKS!
                     self.cpp_info.defines.append("BOOST_ALL_NO_LIB")
@@ -892,8 +910,10 @@ class BoostConan(ConanFile):
                 # https://github.com/conan-community/conan-boost/issues/127#issuecomment-404750974
                 self.cpp_info.system_libs.append("bcrypt")
             elif self.settings.os == "Linux":
-                # https://github.com/conan-community/conan-boost/issues/135
-                self.cpp_info.system_libs.extend(["pthread", "rt"])
+                # https://github.com/conan-community/community/issues/135
+                self.cpp_info.system_libs.append("rt")
+                if self.options.multithreading:
+                    self.cpp_info.system_libs.append("pthread")
 
         self.env_info.BOOST_ROOT = self.package_folder
         self.cpp_info.bindirs.append("lib")
