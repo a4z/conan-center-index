@@ -46,11 +46,7 @@ class MinizConan(ConanFile):
         return self._cmake
 
     def build(self):
-<<<<<<< HEAD
-        for patch in self.conan_data["patches"][self.version]:
-=======
         for patch in self.conan_data.get("patches", {}).get(self.version, []):
->>>>>>> master
             tools.patch(**patch)
         cmake = self._configure_cmake()
         cmake.build()
