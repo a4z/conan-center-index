@@ -199,7 +199,8 @@ class LibcurlConan(ConanFile):
             openssl_path = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
             params.append("--with-ssl=%s" % openssl_path)
         elif self.options.with_wolfssl:
-            params.append("--with-wolfssl")
+            wolfssl_path = self.deps_cpp_info["wolfssl"].rootpath.replace("\\", "/")
+            params.append("--with-wolfssl=%s" % wolfssl_path)
             params.append("--without-ssl")
         else:
             params.append("--without-ssl")
@@ -225,6 +226,9 @@ class LibcurlConan(ConanFile):
 
         if not self.options.with_ldap:
             params.append("--disable-ldap")
+
+        if self.settings.build_type == "Debug":
+           params.append("--enable-debug")
 
         # Cross building flags
         if tools.cross_building(self.settings):
