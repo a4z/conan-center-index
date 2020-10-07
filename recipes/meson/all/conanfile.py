@@ -10,11 +10,6 @@ class MesonInstallerConan(ConanFile):
     homepage = "https://github.com/mesonbuild/meson"
     license = "Apache-2.0"
     no_copy_source = True
-<<<<<<< HEAD
-    requires = "ninja/1.10.1"
-=======
-
->>>>>>> cmake3.18.3
     _source_subfolder = "source_subfolder"
     _meson_cmd = """@echo off
 CALL python %~dp0/meson.py %*
