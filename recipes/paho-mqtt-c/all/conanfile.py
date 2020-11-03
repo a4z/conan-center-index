@@ -32,9 +32,8 @@ class PahoMqttcConan(ConanFile):
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
-        # Static linking before 1.3.4 isn't supported
-        if tools.Version(self.version) < "1.3.4":
-            self.options.shared = True
+            if tools.Version(self.version) < "1.3.4": # Static linking before 1.3.4 isn't supported on Windows
+                self.options.shared = True
 
     def configure(self):
         del self.settings.compiler.cppstd
