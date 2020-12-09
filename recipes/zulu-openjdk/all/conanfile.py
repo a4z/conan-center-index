@@ -1,6 +1,6 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
-import os, platform, glob
+import os, glob
 
 
 class ZuluOpenJDK(ConanFile):
@@ -18,7 +18,7 @@ class ZuluOpenJDK(ConanFile):
 
     @property
     def _jni_folder(self):
-        folder = {"Linux": "linux", "Darwin": "darwin", "Windows": "win32"}.get(platform.system())
+        folder = {"Linux": "linux", "Macos": "darwin", "Windows": "win32"}.get(str(self.settings.os))
         return os.path.join("include", folder)
 
     def configure(self):
@@ -56,4 +56,4 @@ class ZuluOpenJDK(ConanFile):
         self.env_info.JAVA_HOME = java_home
 
         self.output.info("Appending PATH environment variable with : {0}".format(bin_path))
-        self.env_info.path.append(bin_path)
+        self.env_info.PATH.append(bin_path)
