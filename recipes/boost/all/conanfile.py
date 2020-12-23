@@ -879,7 +879,7 @@ class BoostConan(ConanFile):
 
         # Specify here the toolset with the binary if present if don't empty parameter :
         contents += '\nusing "%s" : %s : ' % (self._toolset, self._toolset_version)
-        contents += ' "%s"' % self._cxx.replace("\\", "/")
+        contents += ' %s' % self._cxx.replace("\\", "/")
 
         if tools.is_apple_os(self.settings.os):
             if self.settings.compiler == "apple-clang":
@@ -896,6 +896,8 @@ class BoostConan(ConanFile):
             contents += '<cxxflags>"%s" ' % os.environ["CXXFLAGS"]
         if "CFLAGS" in os.environ:
             contents += '<cflags>"%s" ' % os.environ["CFLAGS"]
+        if "CPPFLAGS" in os.environ:
+            contents += '<compileflags>"%s" ' % os.environ["CPPFLAGS"]
         if "LDFLAGS" in os.environ:
             contents += '<linkflags>"%s" ' % os.environ["LDFLAGS"]
         if "ASFLAGS" in os.environ:
@@ -1033,10 +1035,10 @@ class BoostConan(ConanFile):
             self.cpp_info.components["headers"].defines.append("BOOST_ASIO_NO_DEPRECATED")
 
         if self.options.filesystem_no_deprecated:
-            self.cpp_info.components["headers"].append("BOOST_FILESYSTEM_NO_DEPRECATED")
+            self.cpp_info.components["headers"].defines.append("BOOST_FILESYSTEM_NO_DEPRECATED")
 
         if self.options.segmented_stacks:
-            self.cpp_info.components["headers"].extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
+            self.cpp_info.components["headers"].defines.extend(["BOOST_USE_SEGMENTED_STACKS", "BOOST_USE_UCONTEXT"])
 
         if not self.options.header_only:
             if self.options.error_code_header_only:
