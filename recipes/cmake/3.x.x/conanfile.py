@@ -25,7 +25,7 @@ class CMakeConan(ConanFile):
 
     def _minor_version(self):
         return ".".join(str(self.version).split(".")[:2])
-    
+
     def config_options(self):
         if self.settings.os == "Windows":
             self.options.with_openssl = False
@@ -59,11 +59,7 @@ class CMakeConan(ConanFile):
                 "{} requires a compiler that supports at least C++{}".format(self.name, minimal_cpp_standard))
 
     def requirements(self):
-<<<<<<< HEAD
-        if self._with_openssl:
-=======
         if self.options.with_openssl:
->>>>>>> master
             self.requires("openssl/1.1.1i")
 
     def source(self):
