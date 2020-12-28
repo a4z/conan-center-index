@@ -100,6 +100,9 @@ class Mosquitto(ConanFile):
         self._cmake.definitions["DOCUMENTATION"] = False
         self._cmake.definitions["CMAKE_INSTALL_SYSCONFDIR"] = os.path.join(self.package_folder, "res").replace("\\", "/")
         self._cmake.configure(build_folder=self._build_subfolder)
+        if self.options.with_tls:
+            self._cmake.definitions["OPENSSL_SEARCH_PATH"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
+            self._cmake.definitions["OPENSSL_ROOT_DIR"] = self.deps_cpp_info["openssl"].rootpath.replace("\\", "/")
         return self._cmake
 
     # def _patch_sources(self):
@@ -124,12 +127,12 @@ class Mosquitto(ConanFile):
                                     "${OPENSSL_LIBRARIES}",
                                     "${OPENSSL_LIBRARIES} ws2_32 crypt32")
 
-            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),
-                                "install(TARGETS libmosquitto RUNTIME DESTINATION \"${CMAKE_INSTALL_BINDIR}\" LIBRARY DESTINATION \"${CMAKE_INSTALL_LIBDIR}\")",
-                                "install(TARGETS libmosquitto RUNTIME DESTINATION \"${CMAKE_INSTALL_BINDIR}\" LIBRARY DESTINATION \"${CMAKE_INSTALL_LIBDIR}\" ARCHIVE DESTINATION \"${CMAKE_INSTALL_LIBDIR}\")")
-            tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "cpp", "CMakeLists.txt"),
-                                "install(TARGETS mosquittopp RUNTIME DESTINATION \"${CMAKE_INSTALL_BINDIR}\" LIBRARY DESTINATION \"${CMAKE_INSTALL_LIBDIR}\")",
-                                "install(TARGETS mosquittopp RUNTIME DESTINATION \"${CMAKE_INSTALL_BINDIR}\" LIBRARY DESTINATION \"${CMAKE_INSTALL_LIBDIR}\" ARCHIVE DESTINATION \"${CMAKE_INSTALL_LIBDIR}\")")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "CMakeLists.txt"),
+                            "install(TARGETS libmosquitto RUNTIME DESTINATION \"${CMAKE_INSTALL_BINDIR}\" LIBRARY DESTINATION \"${CMAKE_INSTALL_LIBDIR}\")",
+                            "install(TARGETS libmosquitto RUNTIME DESTINATION \"${CMAKE_INSTALL_BINDIR}\" LIBRARY DESTINATION \"${CMAKE_INSTALL_LIBDIR}\" ARCHIVE DESTINATION \"${CMAKE_INSTALL_LIBDIR}\")")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "lib", "cpp", "CMakeLists.txt"),
+                            "install(TARGETS mosquittopp RUNTIME DESTINATION \"${CMAKE_INSTALL_BINDIR}\" LIBRARY DESTINATION \"${CMAKE_INSTALL_LIBDIR}\")",
+                            "install(TARGETS mosquittopp RUNTIME DESTINATION \"${CMAKE_INSTALL_BINDIR}\" LIBRARY DESTINATION \"${CMAKE_INSTALL_LIBDIR}\" ARCHIVE DESTINATION \"${CMAKE_INSTALL_LIBDIR}\")")
 
 
     def build(self):
