@@ -27,7 +27,7 @@ class AndroidNDKInstallerConan(ConanFile):
             raise ConanInvalidConfiguration("No binaries available for other than 'x86_64' architectures")
 
     def source(self):
-        tarballs = self.conan_data["sources"][self.version]
+        tarballs = self.conan_data["sources"][self.version]["url"]
         tools.get(**tarballs[str(self.settings.os)])
         extracted_dir = self.name + "-" + self.version
         os.rename(extracted_dir, self._source_subfolder)
@@ -97,7 +97,6 @@ class AndroidNDKInstallerConan(ConanFile):
 
     def package(self):
         self.copy(pattern="*", dst=".", src=self._source_subfolder, keep_path=True, symlinks=True)
-        self.copy(pattern="*", dst="bin", src=self._source_subfolder, keep_path=True, symlinks=True)
         self.copy(pattern="*NOTICE", dst="licenses", src=self._source_subfolder)
         self.copy(pattern="*NOTICE.toolchain", dst="licenses", src=self._source_subfolder)
         self.copy("cmake-wrapper.cmd")
