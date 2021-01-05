@@ -44,7 +44,7 @@ class PulseAudioConan(ConanFile):
         return "source_subfolder"
 
     _autotools = None
-    
+
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
@@ -62,7 +62,7 @@ class PulseAudioConan(ConanFile):
         self.requires("libsndfile/1.0.30")
         self.requires("libcap/2.45")
         if self.options.with_alsa:
-            self.requires("libalsa/1.1.9")
+            self.requires("libalsa/1.2.4")
         if self.options.with_glib:
             self.requires("glib/2.64.0")
         if self.options.with_fftw:
@@ -70,7 +70,7 @@ class PulseAudioConan(ConanFile):
         if self.options.with_x11:
             self.requires("xorg/system")
         if self.options.with_openssl:
-            self.requires("openssl/1.1.1h")   
+            self.requires("openssl/1.1.1i")
         # FIXME: enable when #2147 is merged
         # if self.options.with_dbus
         #     self.requires("dbus/1.12.16")
@@ -84,7 +84,7 @@ class PulseAudioConan(ConanFile):
         if not self._autotools:
             self._autotools = AutoToolsBuildEnvironment(self)
             args=[]
-            
+
             # FIXME: add dbus when #2147 is merged
             for lib in ["alsa", "x11", "openssl"]:
                 args.append("--%s-%s" % ("enable" if getattr(self.options, "with_" + lib) else "disable", lib))
@@ -95,10 +95,11 @@ class PulseAudioConan(ConanFile):
             else:
                 args.extend(["--enable-shared=no", "--enable-static=yes"])
             args.append("--with-udev-rules-dir=%s" % os.path.join(self.package_folder, "bin", "udev", "rules.d"))
+            args.append("--with-systemduserunitdir=%s" % os.path.join(self.build_folder, "ignore"))
             with tools.environment_append({"PKG_CONFIG_PATH": self.build_folder}):
                 with tools.environment_append({
                         "FFTW_CFLAGS": tools.PkgConfig("fftw").cflags,
-                        "FFTW_LIBS": tools.PkgConfig("fftw").libs} if self.options.with_fftw else tools.no_op()):
+                        "FFTW_LIBS": tools.PkgConfig("fftw").libs}) if self.options.with_fftw else tools.no_op():
                     with tools.environment_append(RunEnvironment(self).vars):
                         self._autotools.configure(args=args,  configure_dir=self._source_subfolder)
         return self._autotools
