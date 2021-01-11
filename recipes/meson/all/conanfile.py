@@ -20,7 +20,7 @@ exec "$meson_dir/meson.py" "$@"
 """
 
     def requirements(self):
-        self.requires("ninja/1.10.1")
+        self.requires("ninja/1.10.2")
 
     def package_id(self):
         self.info.header_only()
