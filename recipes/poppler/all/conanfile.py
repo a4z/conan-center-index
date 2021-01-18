@@ -7,7 +7,7 @@ class PopplerConan(ConanFile):
     name = "poppler"
     description = "Poppler is a PDF rendering library based on the xpdf-3.0 code base"
     homepage = "https://poppler.freedesktop.org/"
-    topics = "conan", "poppler", "pdf", "rendering"
+    topics = ("conan", "poppler", "pdf", "rendering")
     license = "GPL-2.0-or-later", "GPL-3.0-or-later"
     url = "https://github.com/conan-io/conan-center-index"
     exports_sources = "CMakeLists.txt", "patches/**"
@@ -100,9 +100,9 @@ class PopplerConan(ConanFile):
         if self.options.get_safe("with_libiconv"):
             self.requires("libiconv/1.16")
         if self.options.fontconfiguration == "fontconfig":
-            self.require("fontconfig/2.13.92")
+            self.requires("fontconfig/2.13.92")
         if self.options.with_cairo:
-            self.requirse("cairo/1.17.2")
+            self.requires("cairo/1.17.2")
         if self.options.get_safe("with_glib"):
             self.requires("glib/2.67.1")
         if self.options.get_safe("with_gobject_introspection"):
@@ -112,8 +112,7 @@ class PopplerConan(ConanFile):
             # FIXME: missing qt recipe
             raise ConanInvalidConfiguration("qt is not (yet) available on cii")
         if self.options.get_safe("with_gtk"):
-            # FIXME: missing gtk recipe
-            raise ConanInvalidConfiguration("gtk is not (yet) available on cii")
+            self.requires("gtk/3.24.24")
         if self.options.with_openjpeg:
             self.requires("openjpeg/2.4.0")
         if self.options.with_lcms:
@@ -202,6 +201,9 @@ class PopplerConan(ConanFile):
             poppler_global = os.path.join(self._source_subfolder, "cpp", "poppler-global.h")
             tools.replace_in_file(poppler_global, "__declspec(dllimport)", "")
             tools.replace_in_file(poppler_global, "__declspec(dllexport)", "")
+        tools.replace_in_file(os.path.join(self._source_subfolder, "CMakeLists.txt"),
+                              "FREETYPE_INCLUDE_DIRS",
+                              "Freetype_INCLUDE_DIRS")
 
 
     def build(self):
