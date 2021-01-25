@@ -129,6 +129,7 @@ class BoostConan(ConanFile):
     short_paths = True
     no_copy_source = True
     exports_sources = ['patches/*']
+    _cached_dependencies = None
 
     def export(self):
         self.copy(self._dependency_filename, src="dependencies", dst="dependencies")
@@ -139,7 +140,6 @@ class BoostConan(ConanFile):
         return {
             "gcc": 6,
             "clang": 6,
-            "apple-clang": 12,  # guess
             "Visual Studio": 14,  # guess
         }.get(str(self.settings.compiler))
 
@@ -149,7 +149,6 @@ class BoostConan(ConanFile):
         return {
             "gcc": 5,
             "clang": 5,
-            "apple-clang": 12,  # guess
             "Visual Studio": 14,  # guess
         }.get(str(self.settings.compiler))
 
@@ -159,10 +158,12 @@ class BoostConan(ConanFile):
 
     @property
     def _dependencies(self):
-        dependencies_filepath = os.path.join(self.recipe_folder, "dependencies", self._dependency_filename)
-        if not os.path.isfile(dependencies_filepath):
-            raise ConanException("Cannot find {}".format(dependencies_filepath))
-        return yaml.load(open(dependencies_filepath))
+        if self._cached_dependencies is None:
+            dependencies_filepath = os.path.join(self.recipe_folder, "dependencies", self._dependency_filename)
+            if not os.path.isfile(dependencies_filepath):
+                raise ConanException("Cannot find {}".format(dependencies_filepath))
+            self._cached_dependencies = yaml.safe_load(open(dependencies_filepath))
+        return self._cached_dependencies
 
     def _all_dependent_modules(self, name):
         dependencies = {name}
@@ -229,6 +230,11 @@ class BoostConan(ConanFile):
                     self.options.without_fiber = True
                     self.options.without_json = True
                     self.options.without_nowide = True
+            else:
+                self.options.without_fiber = True
+                self.options.without_json = True
+                self.options.without_nowide = True
+
 
         # Remove options not supported by this version of boost
         for dep_name in CONFIGURE_OPTIONS:
@@ -1318,7 +1324,6 @@ class BoostConan(ConanFile):
                         if requirement != self.options.i18n_backend:
                             continue
                     self.cpp_info.components[module].requires.append("{0}::{0}".format(conan_requirement))
-
             for incomplete_component in incomplete_components:
                 self.output.warn("Boost component '{0}' is missing libraries. Try building boost with '-o boost:without_{0}'.".format(incomplete_component))
 
