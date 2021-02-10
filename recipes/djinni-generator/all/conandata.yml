@@ -1,0 +1,10 @@
+sources:
+  "0.1":
+    url: https://github.com/cross-language-cpp/djinni-generator/releases/download/v0.1/djinni
+    sha256: "72356ae6af529e34f143121a749de573edea484966be1a326242e6e89b3ad98e"
+  "0.2.0":
+    url: https://github.com/cross-language-cpp/djinni-generator/releases/download/v0.2.0/djinni
+    sha256: "67005995418656baf4a94ae4342a77b078cf9d818139ac0c8e84fd3bd44a4ba2"
+  "0.3.0":
+    url: https://github.com/cross-language-cpp/djinni-generator/releases/download/v0.3.0/djinni
+    sha256: "b3dbe0b5d88c58b24b765b7f581531ed14227c37b812453e92d3a2a8ca39fe0a"

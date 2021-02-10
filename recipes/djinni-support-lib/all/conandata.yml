@@ -1,0 +1,12 @@
+sources:
+  "pre0.2.0":
+    url: https://github.com/a4z/djinni/archive/pre0.2.0.tar.gz
+    sha256: "6e03f21c83982002203d700f29b655342b184e18ded583952e2ca9ab519dfd5c"
+
+  "0.0.1-alpha":
+    url: https://github.com/cross-language-cpp/djinni-support-lib/archive/v0.0.1-alpha.tar.gz
+    sha256: "d0d8c93db5c8a8162ced9aa4ef772f1c8bc070eec02e6cf15666c7499cb57293"
+
+  "0.0.1":
+    url: https://github.com/cross-language-cpp/djinni-support-lib/archive/v0.0.1.tar.gz
+    sha256: "ddef30a95a8bd325446d3a76ea9c11f198f3b33f66157217bd46fb13d75c43d2"

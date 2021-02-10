@@ -1,0 +1,10 @@
+versions:
+  "pre0.2.0":
+    folder: "per"
+  "0.1":
+    folder: "all"
+  "0.2.0":
+    folder: "all"
+  "0.3.0":
+    folder: "all"
+
