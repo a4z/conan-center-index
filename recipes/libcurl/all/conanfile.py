@@ -142,9 +142,9 @@ class LibcurlConan(ConanFile):
 
     def requirements(self):
         if self.options.with_ssl == "openssl":
-            self.requires("openssl/1.1.1i")
+            self.requires("openssl/1.1.1j")
         elif self.options.with_ssl == "wolfssl":
-            self.requires("wolfssl/4.5.0")
+            self.requires("wolfssl/4.6.0")
         if self.options.with_nghttp2:
             self.requires("libnghttp2/1.42.0")
         if self.options.with_libssh2:
@@ -347,7 +347,7 @@ class LibcurlConan(ConanFile):
     def _build_with_autotools(self):
         with tools.chdir(self._source_subfolder):
             # autoreconf
-            self.run("{} -fiv".format(tools.get_env("AUTORECONF")), win_bash=tools.os_info.is_windows, run_environment=True)
+            self.run("{} -fiv".format(tools.get_env("AUTORECONF") or "autoreconf"), win_bash=tools.os_info.is_windows, run_environment=True)
 
             # fix generated autotools files on alle to have relocateable binaries
             if tools.is_apple_os(self.settings.os):
