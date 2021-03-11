@@ -58,7 +58,7 @@ def install_config(name: str) -> bool:
     """
     path = pathlib.Path(__file__).parent.parent / "configs" / name
     if not path.exists():
-        print(f"Config directory not found: {name}")
+        print(f"Config directory not found: {name}", file=sys.stderr)
         return False
     cmd = [
         "conan",
