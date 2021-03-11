@@ -11,6 +11,7 @@ import argparse
 import textwrap
 import platform
 import pathlib
+from typing import List
 from sprun import spr
 
 
@@ -51,7 +52,7 @@ def fix_platform_profile(name: str) -> spr.CommandList:
     return commands
 
 
-def install_config(name: str):
+def install_config(name: str) -> bool:
     """ Builds, and runs all the commands,
         This is the actual entrypoint, after doing input and other validations
     """
@@ -70,11 +71,11 @@ def install_config(name: str):
     commands.append(cmd)
     commands.append(create_default_profile("native"))
     commands += fix_platform_profile("native")
-    spr.run(commands, on_error=spr.Proceed.STOP)
-    return True
+    result = spr.run(commands, on_error=spr.Proceed.STOP)
+    return result.success()
 
 
-def list_configs():
+def list_configs() -> List[str]:
     """ Returns a list of configs (directory in repositories configs folder)
     """
     # yes, depends heavily on the current path
