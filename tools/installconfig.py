@@ -89,8 +89,8 @@ def main(argv) -> bool:
     def tool_help() -> str:
         """Command line help text to get line breaks as written here"""
         return """\
-            Get the conan package developer setup for the give schema
-            Recommended to us in a custom CONAN_USER_HOME directory.
+            Get the conan package developer setup for the give schema.
+            Recommended: Us in a custom CONAN_USER_HOME directory.
         """
     parser = argparse.ArgumentParser(
         prog=__file__,
