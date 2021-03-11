@@ -107,7 +107,7 @@ def main(argv) -> bool:
         "--config",
         help="Specify wanted configurations",
         type=str)  # use nsdk-devel as default?
-    args = parser.parse_args(sys.argv[1:])
+    args = parser.parse_args(argv)
     if args.list:
         for dir_name in list_configs():
             print(dir_name)
