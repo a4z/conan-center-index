@@ -62,24 +62,25 @@ def install_config(name: str):
         "install",
         "--type", "dir",
         path.as_posix()
-        ]
+    ]
     commands: spr.CommandList = []
     commands.append(cmd)
     commands.append(create_default_profile("native"))
-    commands+= fix_platform_profile("native")
+    commands += fix_platform_profile("native")
     spr.run(commands, on_error=spr.Proceed.STOP)
     return True
+
 
 def list_configs():
     """ Returns a list of configs (directory in repositories configs folder)
     """
-    #yes, depends heavily on the current path
-    #TODO (maybe) add an environment variable where our cci is
+    # yes, depends heavily on the current path
+    # (maybe) add an environment variable where our cci is
     path = pathlib.Path(__file__).parent.parent / "configs"
     return next(os.walk(path))[1]
 
 
-def main(argv) -> bool :
+def main(argv) -> bool:
     """ The entry point which takes all the command line arguments
     """
     def tool_help() -> str:
@@ -94,17 +95,24 @@ def main(argv) -> bool :
         description=textwrap.dedent(tool_help()),
         epilog="",
     )
-    parser.add_argument("--list", help="List available configurations", action="store_true") # feature creep
-    parser.add_argument("-c","--config", help="Specify wanted configurations", type=str) # TODO use default?
+    parser.add_argument(
+        "--list",
+        help="List available configurations",
+        action="store_true")  # feature creep
+    parser.add_argument(
+        "-c",
+        "--config",
+        help="Specify wanted configurations",
+        type=str)  # use nsdk-devel as default?
     args = parser.parse_args(sys.argv[1:])
     if args.list:
         for dir in list_configs():
             print(dir)
         return False
     if not args.config:
-        print("-c/--config required" ,file=sys.stderr)
+        print("-c/--config required", file=sys.stderr)
     if not args.config in list_configs():
-        print(f"Config {args.config} not found" ,file=sys.stderr)
+        print(f"Config {args.config} not found", file=sys.stderr)
         return False
     return install_config(str(args.config))
 
@@ -116,4 +124,3 @@ if __name__ == "__main__":
     except Exception:
         print(traceback.format_exc(), file=sys.stderr)
         sys.exit(1)
-
