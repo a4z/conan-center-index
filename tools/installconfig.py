@@ -52,6 +52,9 @@ def fix_platform_profile(name: str) -> spr.CommandList:
 
 
 def install_config(name: str):
+    """ Builds, and runs all the commands,
+        This is the actual entrypoint, after doing input and other validations
+    """
     path = pathlib.Path(__file__).parent.parent / "configs" / name
     if not path.exists():
         print(f"Config directory not found: {name}")
@@ -106,8 +109,8 @@ def main(argv) -> bool:
         type=str)  # use nsdk-devel as default?
     args = parser.parse_args(sys.argv[1:])
     if args.list:
-        for dir in list_configs():
-            print(dir)
+        for dir_name in list_configs():
+            print(dir_name)
         return False
     if not args.config:
         print("-c/--config required", file=sys.stderr)
