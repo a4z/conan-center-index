@@ -1,0 +1,2 @@
+include(nsdk-ios)
+include(ios-x86_64)

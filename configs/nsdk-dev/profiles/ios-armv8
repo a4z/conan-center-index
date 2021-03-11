@@ -1,0 +1,12 @@
+include(ios)
+
+[settings]
+os.sdk=iphoneos
+arch=armv8
+
+[build_requires]
+
+[options]
+ios-cmake:toolchain_target=OS64
+
+[env]

@@ -1,0 +1,2 @@
+include(nsdk-android)
+include(android-x86_64)

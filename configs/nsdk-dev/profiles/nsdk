@@ -1,0 +1,13 @@
+[options]
+lua:compile_as_cpp=True
+paho-mqtt-c:ssl=True
+paho-mqtt-c:shared=False
+paho-mqtt-c:asynchronous=True
+paho-mqtt-cpp:ssl=True
+libcurl:with_ssl=openssl
+nlohmann_json:multiple_headers=True
+ms-gsl:on_contract_violation=throw
+
+[build_requires]
+
+

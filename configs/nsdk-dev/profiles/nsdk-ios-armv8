@@ -1,0 +1,6 @@
+include(nsdk-ios)
+include(ios-armv8)
+[env]
+openssl:CFLAGS=-fembed-bitcode
+libcurl:CFLAGS=-fembed-bitcode
+libcurl:CPPFLAGS=-fembed-bitcode

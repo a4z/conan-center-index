@@ -1,0 +1,12 @@
+include(ios)
+include(nsdk)
+
+[settings]
+
+
+[build_requires]
+
+[options]
+
+[env]
+CONAN_CMAKE_GENERATOR=Xcode

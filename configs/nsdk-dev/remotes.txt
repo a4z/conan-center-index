@@ -1,0 +1,1 @@
+nsdk-dev     https://artifactory.edp.electrolux.io/artifactory/api/conan/nsdk-conan-dev-local   True
