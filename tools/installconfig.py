@@ -32,7 +32,7 @@ def fix_platform_profile(name: str) -> spr.CommandList:
             "settings.compiler.libcxx=libstdc++11",
             name,
         ]
-        commands.append[cmd]
+        commands.append(cmd)
     if platform.system() == "Darwin":
         commands.append(["conan", "profile", "update",
                          "settings.os.sdk=macosx", name])
