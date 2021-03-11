@@ -124,6 +124,7 @@ if __name__ == "__main__":
     try:
         if not main(sys.argv[1:]):
             sys.exit(1)
+    # pylint: disable=W0703
     except Exception:
         print(traceback.format_exc(), file=sys.stderr)
         sys.exit(1)
