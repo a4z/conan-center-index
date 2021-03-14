@@ -1,7 +1,10 @@
 """ Some helpers that deserve test functions
 """
 import os
+import sys
 from typing import Optional
+from typing import List
+import yaml
 
 
 def is_reference_name(reference: str) -> bool:
@@ -85,6 +88,71 @@ def guess_recipe_dir(reference: str,
     if os.path.isdir(check_path):
         return check_path
     return None
+
+
+# consider optional parameter, taking a folder name (path)
+# and skip the guess. Maybe a named parameter ...
+def get_conan_file(reference: str) -> Optional[str]:
+    """ Guess the reference dir and return path to the conan file in it.
+    Handles cases:,
+        a directory that contains the config.yml , as cci does
+        a directory that contains the conanfile.py
+    """
+    # the easy part, in the dir is a conanfile.py, take that
+    recipe_dir = guess_recipe_dir(reference)
+    if not recipe_dir:
+        return print("Can'f guess folder for", reference)
+    conan_file = os.path.join(recipe_dir, "conanfile.py")
+    if os.path.isfile(conan_file):
+        return conan_file
+    # maybe a cci folder, so check
+    config_yml = os.path.join(recipe_dir, "config.yml")
+    version = reference_version(reference)
+    if os.path.isfile(config_yml):
+        with open(config_yml) as file:
+            data = yaml.load(file, Loader=yaml.FullLoader)
+            try:
+                subfolder = data["versions"][version]["folder"]
+            except KeyError:
+                valid_versions = list(data["versions"].keys())
+                print("Error: Version", version, "not found!", file=sys.stderr)
+                print(
+                    "Error: Valid versions:",
+                    ", ".join(valid_versions),
+                    file=sys.stderr)
+                print("", file=sys.stderr)
+                return None
+    else:
+        subfolder = version
+        # this covers something that in today's cci layout should no exist
+        # but that was there, or in bincrafter, so leaf that for now
+
+    conan_file = os.path.join(recipe_dir, subfolder, "conanfile.py")
+    if os.path.isfile(conan_file):
+        return conan_file
+    return print("Error: Conan file not found:", conan_file, file=sys.stderr)
+
+
+def parse_spec(arg: str) -> List[str]:
+    """ If arg is a file, returns the file contend as list
+        Note the a file must have 1 package name per line
+
+    If arg is not a file, it is interpreted as a comma seperated string,
+    and returns that as a list, splitted at every occuring ","
+
+    The returned package names are trimmed and empty values are remmoved.
+    Entries starting with # will also be removed
+    """
+    if os.path.isfile(arg):
+        with open(arg, 'r') as file:
+            packages = file.readlines()
+    else:
+        packages = arg.split(",")
+
+    filtered = filter(lambda item: item != "" and not item.startswith("#"),
+                      map(str.strip, packages))
+    return list(filtered)
+
 
 # only for debug ...
 # if __name__ == '__main__':
