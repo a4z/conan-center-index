@@ -91,7 +91,7 @@ def guess_recipe_dir(reference: str,
 
 
 # consider optional parameter, taking a folder name (path)
-# and skip the guess. Maybe a named parameter ...
+# and skip the guess. Maybe a named parameter ... hint or so
 def get_conan_file(reference: str) -> Optional[str]:
     """ Guess the reference dir and return path to the conan file in it.
     Handles cases:,
@@ -101,7 +101,7 @@ def get_conan_file(reference: str) -> Optional[str]:
     # the easy part, in the dir is a conanfile.py, take that
     recipe_dir = guess_recipe_dir(reference)
     if not recipe_dir:
-        return print("Can'f guess folder for", reference)
+        return print("Can't guess folder for", reference)
     conan_file = os.path.join(recipe_dir, "conanfile.py")
     if os.path.isfile(conan_file):
         return conan_file
