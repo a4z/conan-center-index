@@ -9,4 +9,4 @@ compiler.libcxx=libc++
 build_type=Release
 
 [build_requires]
-ios-cmake/4.0.0@
+ios-cmake/4.2.0@
