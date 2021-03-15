@@ -45,9 +45,9 @@ def fix_platform_profile(name: str) -> spr.CommandList:
             name])
         if platform.processor() == "arm":
             commands.append(["conan", "profile", "update",
-                                "settings.os.arch=armv8", name])
+                                "settings.arch=armv8", name])
             commands.append(["conan", "profile", "update",
-                                "settings.os.arch_build=armv8", name])
+                                "settings.arch_build=armv8", name])
     # Windows no known actions at the moment
     return commands
 
@@ -60,9 +60,9 @@ def fix_ios_sim_profile(name):
         toolchain_target = "SIMMULATORARM64"
     commands: spr.CommandList = []
     commands.append(["conan", "profile", "update",
-                       f"settings.os.arch={arch}", name])
+                       f"settings.arch={arch}", name])
     commands.append(["conan", "profile", "update",
-                        f"ios-cmake:toolchain_target={toolchain_target}", name])
+                        f"options.ios-cmake:toolchain_target={toolchain_target}", name])
     return commands
 
 
