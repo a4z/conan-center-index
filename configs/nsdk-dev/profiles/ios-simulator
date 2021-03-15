@@ -1,0 +1,12 @@
+include(ios)
+
+[settings]
+os.sdk=iphonesimulator
+arch=INVALID
+
+[build_requires]
+
+[options]
+ios-cmake:toolchain_target=INVALID
+
+[env]

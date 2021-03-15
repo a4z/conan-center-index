@@ -153,6 +153,15 @@ def parse_spec(arg: str) -> List[str]:
                       map(str.strip, packages))
     return list(filtered)
 
+# get_profile_args_for("nsdk", "android")
+# get_profile_args_for("nsdk", "ios")
+def get_profile_args_for(config, target):
+    ...
+    # TODO do that , but maybe slightly different
+    # take profile translations from a file
+    # this would allow adding that setup to configs...
+    # support code translation ?
+
 
 # only for debug ...
 # if __name__ == '__main__':

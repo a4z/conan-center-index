@@ -1,0 +1,12 @@
+include(ios)
+
+[settings]
+os.sdk=iphonesimulator
+arch=armv8
+
+[build_requires]
+
+[options]
+ios-cmake:toolchain_target=SIMULATORARM64
+
+[env]
