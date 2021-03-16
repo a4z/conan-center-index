@@ -1,0 +1,9 @@
+--
+nsdk:
+  - native:
+      all: --profile:build native --profile:host nsdk-native
+  - ios:
+      armv8: --profile:build native --profile:host nsdk-ios-armv8
+      x86_64: --profile:build native --profile:host nsdk-ios-armv8
+  - android:
+
