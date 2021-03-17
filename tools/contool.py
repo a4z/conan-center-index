@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """ Utility to run our package creation tasks
-"""
 
+    each subcommand is implemented in conwarp
+    by implementing the conwarp.base.Command ''protocol''
+
+"""
 import sys
 import traceback
 import sys
@@ -9,7 +12,11 @@ import traceback
 import argparse
 import textwrap
 from conwrap import create
-
+from conwrap import lock
+from conwrap import lint
+from conwrap import upload
+from conwrap import delete
+from conwrap import config
 
 def main(argv):
     """ The entry point which takes all the command line arguments
@@ -26,16 +33,49 @@ def main(argv):
         description=textwrap.dedent(tool_help()),
         epilog="",
     )
-    subparser = parser.add_subparsers(
-        help="Following subcommands are supported:")
 
-    create_cmd = subparser.add_parser(
-        "create", help="Create given packages to given profiles")
-    create.setup_run_args(create_cmd)
-    create_cmd.set_defaults(func=create.run)
+    # all commands have a print only
+    parser.add_argument('--print-only', action='store_true',
+        help="Do not run any commands, only print them out."
+        "NOTE: If used, must be provided before a sub command@"
+    )
+
+
+    subparser = parser.add_subparsers(
+        help="The following subcommands are supported:")
+
+    create.Command.setup(subparser.add_parser(
+        "create",
+        help="Create given packages to given profiles"
+    ))
+    config.Command.setup(subparser.add_parser(
+        "config",
+        help="Install profiles and config"
+    ))
+    delete.Command.setup(subparser.add_parser(
+        "delete",
+        help="Delete packages (for give profiles (future/feature))"
+    ))
+    lock.Command.setup(subparser.add_parser(
+        "lock",
+        help="Creates lockfiles for a given conan file"
+    ))
+    lint.Command.setup(subparser.add_parser(
+        "lint",
+        help="Run lint tests with much more text and ed"
+    ))
+    upload.Command.setup(subparser.add_parser(
+        "upload",
+        help="Upload packages (for give profiles (future/feature))"
+    ))
 
     parsed_args, other_args = parser.parse_known_args(argv)
-    parsed_args.func(parsed_args, other_args)
+    if not hasattr(parsed_args, "func"):
+        print("Error: Command required, non provided", file=sys.stderr)
+        return False
+    return parsed_args.func(parsed_args, other_args)
+
+
 
 if __name__ == "__main__":
     try:
@@ -45,4 +85,3 @@ if __name__ == "__main__":
     except Exception:
         print(traceback.format_exc(), file=sys.stderr)
         sys.exit(1)
-
