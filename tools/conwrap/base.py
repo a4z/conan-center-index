@@ -1,5 +1,6 @@
+""" Provides the abstract Command ''protocol''
+"""
 from abc import ABC, abstractmethod
-
 import argparse
 from . import helpers
 from typing import List
@@ -16,7 +17,6 @@ class Command(ABC):
 
         """
         ...
-
 
     @staticmethod
     @abstractmethod

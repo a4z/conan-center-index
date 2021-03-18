@@ -1,20 +1,29 @@
 #!/usr/bin/env python3
 """Utility to install the config subfolder from ../../configs/[subfolder]
-
+Yes, it dependes very much on the path
 Note that those profiles are only needed for development of packages.
 For using packages, use lockfiles.
 """
 import os
 import sys
-import argparse
 import platform
 import pathlib
+import argparse
 from typing import List
 from sprun import spr
+
+from conwrap import helpers
 from . import base
-from . import helpers
+#from . import helpers
 
 
+def config_dir_path() -> pathlib.Path:
+    """ Get a path to the config directory
+
+        Depends heavily on the current __file__ path
+        TODO (maybe) add an environment variable where our cci is
+    """
+    return pathlib.Path(helpers.my_cci_root()) / "configs"
 
 def create_default_profile(name: str) -> spr.Command:
     """Create command to auto detected profile with the given name"""
@@ -46,14 +55,15 @@ def fix_platform_profile(name: str) -> spr.CommandList:
             name])
         if platform.processor() == "arm":
             commands.append(["conan", "profile", "update",
-                                "settings.arch=armv8", name])
+                             "settings.arch=armv8", name])
             commands.append(["conan", "profile", "update",
-                                "settings.arch_build=armv8", name])
+                             "settings.arch_build=armv8", name])
     # Windows no known actions at the moment
     return commands
 
 
 def fix_ios_sim_profile(name):
+    """Update ios profiles like needed"""
     arch = "x86_64"
     toolchain_target = "SIMMULATOR64"
     if platform.processor() == "arm":
@@ -61,9 +71,9 @@ def fix_ios_sim_profile(name):
         toolchain_target = "SIMMULATORARM64"
     commands: spr.CommandList = []
     commands.append(["conan", "profile", "update",
-                       f"settings.arch={arch}", name])
+                     f"settings.arch={arch}", name])
     commands.append(["conan", "profile", "update",
-                        f"options.ios-cmake:toolchain_target={toolchain_target}", name])
+                     f"options.ios-cmake:toolchain_target={toolchain_target}", name])
     return commands
 
 
@@ -71,7 +81,7 @@ def install_config(name: str) -> bool:
     """ Builds, and runs all the commands,
         This is the actual entrypoint, after doing input and other validations
     """
-    path = pathlib.Path(__file__).parent.parent / "configs" / name
+    path = config_dir_path() / name
     if not path.exists():
         print(f"Config directory not found: {name}", file=sys.stderr)
         return False
@@ -87,7 +97,7 @@ def install_config(name: str) -> bool:
     commands.append(create_default_profile("native"))
     commands += fix_platform_profile("native")
     if platform.system() == "Darwin":
-        commands += fix_ios_sim_profile( "ios-simulator")
+        commands += fix_ios_sim_profile("ios-simulator")
     result = spr.run(commands, on_error=spr.Proceed.STOP)
     return result.success()
 
@@ -95,16 +105,16 @@ def install_config(name: str) -> bool:
 def list_configs() -> List[str]:
     """ Returns a list of configs (directory in repositories configs folder)
     """
-    # yes, depends heavily on the current path
-    # (maybe) add an environment variable where our cci is
-    path = pathlib.Path(__file__).parent.parent.parent / "configs"
+    path = config_dir_path()
     return next(os.walk(path))[1]
 
 
-
 class Command(base.Command):
+    """ Config command implementation of the base.Command ''protocol''"""
 
+    @staticmethod
     def setup(sub_cmd: argparse.ArgumentParser) -> argparse.ArgumentParser:
+        """ The setup implementation of the base.Command ''protocol''"""
         sub_cmd.add_argument(
             "--list",
             help="List available configurations",
@@ -116,8 +126,9 @@ class Command(base.Command):
             type=str)  # use nsdk-devel as default?
         sub_cmd.set_defaults(func=Command.run)
 
-
+    @staticmethod
     def run(parsed_args: argparse.Namespace, other_args: List[str]):
+        """ The run implementation of the base.Command ''protocol''"""
         if parsed_args.print_only:
             print("Print only")
 

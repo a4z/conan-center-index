@@ -3,6 +3,7 @@ from . import base
 from . import helpers
 from typing import List
 
+
 class Command(base.Command):
 
     def setup(sub_cmd: argparse.ArgumentParser) -> None:
@@ -10,4 +11,3 @@ class Command(base.Command):
 
     def run(parsed_args: argparse.Namespace, other_args: List[str]):
         print("Run lock")
-

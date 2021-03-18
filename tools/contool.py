@@ -7,8 +7,6 @@
 """
 import sys
 import traceback
-import sys
-import traceback
 import argparse
 import textwrap
 from conwrap import create
@@ -17,6 +15,7 @@ from conwrap import lint
 from conwrap import upload
 from conwrap import delete
 from conwrap import config
+
 
 def main(argv):
     """ The entry point which takes all the command line arguments
@@ -36,10 +35,9 @@ def main(argv):
 
     # all commands have a print only
     parser.add_argument('--print-only', action='store_true',
-        help="Do not run any commands, only print them out."
-        "NOTE: If used, must be provided before a sub command@"
-    )
-
+                        help="Do not run any commands, only print them out."
+                        "NOTE: If used, must be provided before a sub command."
+                        )
 
     subparser = parser.add_subparsers(
         help="The following subcommands are supported:")
@@ -74,7 +72,6 @@ def main(argv):
         print("Error: Command required, non provided", file=sys.stderr)
         return False
     return parsed_args.func(parsed_args, other_args)
-
 
 
 if __name__ == "__main__":

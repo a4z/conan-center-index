@@ -11,4 +11,3 @@ class Command(base.Command):
 
     def run(parsed_args: argparse.Namespace, other_args: List[str]):
         print("Run delete")
-
