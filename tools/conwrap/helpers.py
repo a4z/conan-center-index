@@ -1,10 +1,16 @@
 """ Some helpers that deserve test functions
 """
 import os
+import platform
 import sys
 from typing import Optional
 from typing import List
 import yaml
+
+
+def mod_name(for_file: str) -> str:
+    """Base name of a path without extension"""
+    return os.path.splitext(os.path.basename(for_file))[0]
 
 
 def is_reference_name(reference: str) -> bool:
@@ -54,6 +60,18 @@ def reference_version(reference: str) -> Optional[str]:
     return reference[start:end]
 
 
+def my_cci_root(hint: Optional[str] = None) -> str:
+    """ Returns path to the cci root so recipes and configs can be found
+
+        This is heavily file location dependend, and until a better way is found
+        -> it is as it is.
+    """
+    assert not hint  # not sure how to use so far ...
+    dir_path = os.path.dirname(os.path.realpath(__file__))  # conwrap
+    dir_path = os.path.dirname(dir_path)  # tools
+    return os.path.dirname(dir_path)  # cci
+
+
 def guess_recipe_dir(reference: str,
                      hint: Optional[str] = None) -> Optional[str]:
     """ Does best effort to guess a recipe directory for a reference
@@ -82,8 +100,7 @@ def guess_recipe_dir(reference: str,
         check_path = os.path.join(item, name)
         if os.path.isdir(check_path):
             return check_path
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    dir_path = os.path.dirname(dir_path)
+    dir_path = my_cci_root()
     check_path = os.path.join(dir_path, "recipes", name)
     if os.path.isdir(check_path):
         return check_path
@@ -153,14 +170,33 @@ def parse_spec(arg: str) -> List[str]:
                       map(str.strip, packages))
     return list(filtered)
 
-# get_profile_args_for("nsdk", "android")
-# get_profile_args_for("nsdk", "ios")
-def get_profile_args_for(config, target):
-    ...
-    # TODO do that , but maybe slightly different
-    # take profile translations from a file
-    # this would allow adding that setup to configs...
-    # support code translation ?
+
+def profile_args_for(profile_spec: str) -> List[List[str]]:
+    """ as get_profile_args1, but returns a list of [-pr:b, name, -pr:h, name, ...] args
+        needs of course even more commons sense about profile naming
+    """
+    extra_args: List = []
+    if profile_spec.endswith("native"):
+        profiles = [profile_spec]
+        if platform.system() == "Windows":  # pragma: no cover
+            pass
+    else:
+        if profile_spec.endswith("android"):
+            suffixes = ["armv7", "armv8", "x86_64", "x86"]
+        elif profile_spec.endswith("android-ndk"):
+            profile_spec = profile_spec[:-len("-ndk")]
+            suffixes = ["armv7", "armv8", "x86_64", "x86"]
+            # profile must exists, with build dependencies
+            extra_args = ["--profile:host", "android-ndk"]
+        elif profile_spec.endswith("ios"):
+            suffixes = ["armv8", "x86_64"]
+        else:
+            raise Exception(f"Unexpected profile name {profile_spec}")
+        profiles = list(map(lambda p: f"{profile_spec}-{p}", suffixes))
+
+    build_profile: str = "native"
+    common_args: List = ["--profile:build", build_profile, "--profile:host"]
+    return list(map(lambda p: common_args + [p] + extra_args, profiles))
 
 
 # only for debug ...

@@ -1,5 +1,5 @@
 
-import tools.helpers as helpers
+import conwrap.helpers as helpers
 import unittest
 import os
 
@@ -46,7 +46,7 @@ class TestGuessRecipeDir(unittest.TestCase):
         self.assertEqual(
             os.path.basename(
                 os.path.dirname(r_path)),
-                "recipe")
+            "recipe")
         r_path = helpers.guess_recipe_dir("package/1.2.3@", "no/where/here")
         self.assertIsNone(r_path)
 
@@ -59,7 +59,7 @@ class TestGuessRecipeDir(unittest.TestCase):
         self.assertEqual(
             os.path.basename(
                 os.path.dirname(r_path)),
-                "recipe")
+            "recipe")
         os.environ["CONAN_RECIPE_DIRS"] = "/no/where/here:"
         r_path = helpers.guess_recipe_dir("package/1.2.3@")
         self.assertIsNone(r_path)
@@ -77,7 +77,9 @@ class TestGetConanFile(unittest.TestCase):
         reference = "alljoyn/0.16.10@"
         conan_file = helpers.get_conan_file(reference)
         self.assertIsNotNone(conan_file)
-        self.assertTrue(os.path.exists(conan_file), f"Not a path: {conan_file}")
+        self.assertTrue(
+            os.path.exists(conan_file),
+            f"Not a path: {conan_file}")
 
     def test_not_a_dir(self):
         self.assertIsNone(helpers.get_conan_file("all__joyn/0.16.10@"))
@@ -86,7 +88,9 @@ class TestGetConanFile(unittest.TestCase):
         reference = "sol2/3.2.2@"
         conan_file = helpers.get_conan_file(reference)
         self.assertIsNotNone(conan_file)
-        self.assertTrue(os.path.exists(conan_file), f"Not a path: {conan_file}")
+        self.assertTrue(
+            os.path.exists(conan_file),
+            f"Not a path: {conan_file}")
 
     def test_cci_but_wrong_version(self):
         reference = "zlib/1.2.10@"
@@ -107,17 +111,43 @@ class TestSpecParsing(unittest.TestCase):
 
     def test_a_simple_list(self):
         args = helpers.parse_spec("A,B,C")
-        self.assertListEqual(args, ["A","B","C"])
+        self.assertListEqual(args, ["A", "B", "C"])
 
     def test_a_simple_list_with_filter(self):
         args = helpers.parse_spec("A,B,C, , #D")
-        self.assertListEqual(args, ["A","B","C"])
+        self.assertListEqual(args, ["A", "B", "C"])
 
     def test_a_list_from_file(self):
         dir_path = os.path.dirname(__file__)
         file_path = os.path.join(dir_path, "stubs", "speclist.txt")
         args = helpers.parse_spec(file_path)
-        self.assertListEqual(args, ["A","B","D"])
+        self.assertListEqual(args, ["A", "B", "D"])
+
+
+class TestGettingProfiles(unittest.TestCase):
+
+    def test_getting_native_profile(self):
+        profile_args = helpers.profile_args_for("nsdk-native")
+        self.assertEqual(len(profile_args), 1)
+
+    def test_getting_ios_profile(self):
+        profile_args = helpers.profile_args_for("nsdk-ios")
+        self.assertEqual(len(profile_args), 2)
+
+    def test_getting_android_profile(self):
+        profile_args = helpers.profile_args_for("nsdk-android")
+        self.assertEqual(len(profile_args), 4)
+        self.assertEqual(len(profile_args[0]), 4)  # -p:b a -p:h b
+
+    def test_getting_android_profile_ndk(self):
+        profile_args = helpers.profile_args_for("nsdk-android-ndk")
+        self.assertEqual(len(profile_args), 4)
+        self.assertEqual(len(profile_args[0]), 6)  # -p:b a -p:h b -p:b b-nsk
+
+    def test_getting_unknown_profile(self):
+        self.assertRaises(Exception, helpers.profile_args_for, "not-a-spec")
+
 
 if __name__ == '__main__':
+    # pragma: no cover
     unittest.main()

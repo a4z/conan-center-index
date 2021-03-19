@@ -1,18 +1,29 @@
 #!/usr/bin/env python3
-"""Utility to install the config subfolder from ../configs/[subfolder]
-
+"""Utility to install the config subfolder from ../../configs/[subfolder]
+Yes, it dependes very much on the path
 Note that those profiles are only needed for development of packages.
 For using packages, use lockfiles.
 """
 import os
 import sys
-import traceback
-import argparse
-import textwrap
 import platform
 import pathlib
+import argparse
 from typing import List
 from sprun import spr
+
+from . import helpers
+from . import base
+#from . import helpers
+
+
+def config_dir_path() -> pathlib.Path:
+    """ Get a path to the config directory
+
+        Depends heavily on the current __file__ path
+        TODO (maybe) add an environment variable where our cci is
+    """
+    return pathlib.Path(helpers.my_cci_root()) / "configs"
 
 
 def create_default_profile(name: str) -> spr.Command:
@@ -45,14 +56,15 @@ def fix_platform_profile(name: str) -> spr.CommandList:
             name])
         if platform.processor() == "arm":
             commands.append(["conan", "profile", "update",
-                                "settings.arch=armv8", name])
+                             "settings.arch=armv8", name])
             commands.append(["conan", "profile", "update",
-                                "settings.arch_build=armv8", name])
+                             "settings.arch_build=armv8", name])
     # Windows no known actions at the moment
     return commands
 
 
 def fix_ios_sim_profile(name):
+    """Update ios profiles like needed"""
     arch = "x86_64"
     toolchain_target = "SIMMULATOR64"
     if platform.processor() == "arm":
@@ -60,9 +72,9 @@ def fix_ios_sim_profile(name):
         toolchain_target = "SIMMULATORARM64"
     commands: spr.CommandList = []
     commands.append(["conan", "profile", "update",
-                       f"settings.arch={arch}", name])
+                     f"settings.arch={arch}", name])
     commands.append(["conan", "profile", "update",
-                        f"options.ios-cmake:toolchain_target={toolchain_target}", name])
+                     f"options.ios-cmake:toolchain_target={toolchain_target}", name])
     return commands
 
 
@@ -70,7 +82,7 @@ def install_config(name: str) -> bool:
     """ Builds, and runs all the commands,
         This is the actual entrypoint, after doing input and other validations
     """
-    path = pathlib.Path(__file__).parent.parent / "configs" / name
+    path = config_dir_path() / name
     if not path.exists():
         print(f"Config directory not found: {name}", file=sys.stderr)
         return False
@@ -86,7 +98,7 @@ def install_config(name: str) -> bool:
     commands.append(create_default_profile("native"))
     commands += fix_platform_profile("native")
     if platform.system() == "Darwin":
-        commands += fix_ios_sim_profile( "ios-simulator")
+        commands += fix_ios_sim_profile("ios-simulator")
     result = spr.run(commands, on_error=spr.Proceed.STOP)
     return result.success()
 
@@ -94,54 +106,46 @@ def install_config(name: str) -> bool:
 def list_configs() -> List[str]:
     """ Returns a list of configs (directory in repositories configs folder)
     """
-    # yes, depends heavily on the current path
-    # (maybe) add an environment variable where our cci is
-    path = pathlib.Path(__file__).parent.parent / "configs"
+    path = config_dir_path()
     return next(os.walk(path))[1]
 
 
-def main(argv) -> bool:
-    """ The entry point which takes all the command line arguments
-    """
-    def tool_help() -> str:
-        """Command line help text to get line breaks as written here"""
-        return """\
-            Get the conan package developer setup for the give schema.
-            Recommended: Us in a custom CONAN_USER_HOME directory.
-        """
-    parser = argparse.ArgumentParser(
-        prog=__file__,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=textwrap.dedent(tool_help()),
-        epilog="",
-    )
-    parser.add_argument(
-        "--list",
-        help="List available configurations",
-        action="store_true")  # feature creep
-    parser.add_argument(
-        "-c",
-        "--config",
-        help="Specify wanted configurations",
-        type=str)  # use nsdk-devel as default?
-    args = parser.parse_args(argv)
-    if args.list:
-        for dir_name in list_configs():
-            print(dir_name)
-        return False
-    if not args.config:
-        print("-c/--config required", file=sys.stderr)
-    if not args.config in list_configs():
-        print(f"Config {args.config} not found", file=sys.stderr)
-        return False
-    return install_config(str(args.config))
+class Command(base.Command):
+    """ Config command implementation of the base.Command ''protocol''"""
 
+    @staticmethod
+    def name():
+        """ The name implementation of the base.Command ''protocol''"""
+        return helpers.mod_name(__file__)
 
-if __name__ == "__main__":
-    try:
-        if not main(sys.argv[1:]):
-            sys.exit(1)
-    # pylint: disable=W0703
-    except Exception:
-        print(traceback.format_exc(), file=sys.stderr)
-        sys.exit(1)
+    @staticmethod
+    def setup(sub_cmd: argparse.ArgumentParser) -> argparse.ArgumentParser:
+        """ The setup implementation of the base.Command ''protocol''"""
+        sub_cmd.add_argument(
+            "--list",
+            help="List available configurations",
+            action="store_true")  # feature creep
+        sub_cmd.add_argument(
+            "-n",
+            "--name",
+            help="Specify wanted configurations",
+            type=str)  # use nsdk-devel as default?
+        sub_cmd.set_defaults(func=Command.run)
+
+    @staticmethod
+    def run(parsed_args: argparse.Namespace, other_args: List[str]):
+        """ The run implementation of the base.Command ''protocol''"""
+        if parsed_args.print_only:
+            print("Print only")
+
+        if parsed_args.list:
+            for dir_name in list_configs():
+                print(dir_name)
+            return True
+
+        if not parsed_args.name:
+            print("-n/--name required", file=sys.stderr)
+        if not parsed_args.name in list_configs():
+            print(f"Config {parsed_args.name} not found", file=sys.stderr)
+            return False
+        return install_config(str(parsed_args.name))
