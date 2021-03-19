@@ -119,3 +119,9 @@ venv.bak/
 
 # scons build files
 *.dblite
+
+
+
+# personal stuff
+.envrc
+.tool-versions
