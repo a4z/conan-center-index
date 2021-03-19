@@ -7,9 +7,11 @@ from typing import Optional
 from typing import List
 import yaml
 
+
 def mod_name(for_file: str) -> str:
     """Base name of a path without extension"""
     return os.path.splitext(os.path.basename(for_file))[0]
+
 
 def is_reference_name(reference: str) -> bool:
     """ Checks if a given reference is a valid reference name
@@ -64,7 +66,7 @@ def my_cci_root(hint: Optional[str] = None) -> str:
         This is heavily file location dependend, and until a better way is found
         -> it is as it is.
     """
-    assert not hint # not sure how to use so far ...
+    assert not hint  # not sure how to use so far ...
     dir_path = os.path.dirname(os.path.realpath(__file__))  # conwrap
     dir_path = os.path.dirname(dir_path)  # tools
     return os.path.dirname(dir_path)  # cci
