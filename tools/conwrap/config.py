@@ -12,7 +12,7 @@ import argparse
 from typing import List
 from sprun import spr
 
-from conwrap import helpers
+from . import helpers
 from . import base
 #from . import helpers
 
@@ -24,6 +24,7 @@ def config_dir_path() -> pathlib.Path:
         TODO (maybe) add an environment variable where our cci is
     """
     return pathlib.Path(helpers.my_cci_root()) / "configs"
+
 
 def create_default_profile(name: str) -> spr.Command:
     """Create command to auto detected profile with the given name"""

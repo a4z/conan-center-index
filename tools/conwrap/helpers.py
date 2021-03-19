@@ -61,9 +61,11 @@ def my_cci_root(hint: Optional[str] = None) -> str:
         This is heavily file location dependend, and until a better way is found
         -> it is as it is.
     """
-    dir_path = os.path.dirname(os.path.realpath(__file__)) # conwrap
-    dir_path = os.path.dirname(dir_path) # tools
-    return os.path.dirname(dir_path) # cci
+    assert not hint # not sure how to use so far ...
+    dir_path = os.path.dirname(os.path.realpath(__file__))  # conwrap
+    dir_path = os.path.dirname(dir_path)  # tools
+    return os.path.dirname(dir_path)  # cci
+
 
 def guess_recipe_dir(reference: str,
                      hint: Optional[str] = None) -> Optional[str]:
@@ -164,35 +166,31 @@ def parse_spec(arg: str) -> List[str]:
     return list(filtered)
 
 
-
-
-def get_profile_args_for(profile_spec: str) -> List[List[str]]:
+def profile_args_for(profile_spec: str) -> List[List[str]]:
     """ as get_profile_args1, but returns a list of [-pr:b, name, -pr:h, name, ...] args
         needs of course even more commons sense about profile naming
     """
     extra_args: List = []
     if profile_spec.endswith("native"):
         profiles = [profile_spec]
-        if platform.system() == "Windows":
-            pass # TODO , let the debug builds up to the user?
-            # this is currently not a problem, user just needs to pass -s:h build_type=Debug to the same command
-            # but it would be nice to have this automated ... with a flag maybe .......
+        if platform.system() == "Windows":  # pragma: no cover
+            pass
     else:
         if profile_spec.endswith("android"):
             suffixes = ["armv7", "armv8", "x86_64", "x86"]
         elif profile_spec.endswith("android-ndk"):
             profile_spec = profile_spec[:-len("-ndk")]
             suffixes = ["armv7", "armv8", "x86_64", "x86"]
-            extra_args = ["--profile:host", "android-ndk"]  # profile must exists, with build dependencies
+            # profile must exists, with build dependencies
+            extra_args = ["--profile:host", "android-ndk"]
         elif profile_spec.endswith("ios"):
             suffixes = ["armv8", "x86_64"]
         else:
             raise Exception(f"Unexpected profile name {profile_spec}")
         profiles = list(map(lambda p: f"{profile_spec}-{p}", suffixes))
 
-    build_profile :str = "native"
+    build_profile: str = "native"
     common_args: List = ["--profile:build", build_profile, "--profile:host"]
-
     return list(map(lambda p: common_args + [p] + extra_args, profiles))
 
 

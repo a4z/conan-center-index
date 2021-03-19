@@ -33,12 +33,6 @@ def main(argv):
         epilog="",
     )
 
-    # all commands have a print only
-    parser.add_argument('--print-only', action='store_true',
-                        help="Do not run any commands, only print them out."
-                        "NOTE: If used, must be provided before a sub command."
-                        )
-
     subparser = parser.add_subparsers(
         help="The following subcommands are supported:")
 
