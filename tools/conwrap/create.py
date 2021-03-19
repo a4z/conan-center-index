@@ -59,23 +59,21 @@ class Command(base.Command):
             if not con_file:
                 print("Error: Package not found:", package, file=sys.stderr)
                 return False
-            pkg_args = [con_file, package]
             for profile_args in profile_args_list:
                 cmd = ["conan", "create", "--test-folder", "None"]
                 cmd += profile_args
                 if other_args:
                     cmd += other_args
-                cmd += pkg_args
+                cmd += [con_file, package]
                 commands.append(cmd)
         if parsed_args.print_only:
             for command in commands:
                 spr.report_command("", command)
             return True
         err_strategy = on_error.get(parsed_args.onerror)
-        print(err_strategy)
         result: spr.Result = spr.run(commands, err_strategy)
         for command in result.commands_ok:
-            spr.report_command("OK:", command)
+            spr.report_command("Passed:", command)
         for command in result.commands_error:
             spr.report_command("Error:", command, sys.stderr)
         return result.success()

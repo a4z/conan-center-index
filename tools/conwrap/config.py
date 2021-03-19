@@ -4,6 +4,7 @@ Yes, it dependes very much on the path
 Note that those profiles are only needed for development of packages.
 For using packages, use lockfiles.
 """
+import os
 import sys
 import platform
 import pathlib
