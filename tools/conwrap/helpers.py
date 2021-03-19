@@ -7,6 +7,9 @@ from typing import Optional
 from typing import List
 import yaml
 
+def mod_name(for_file: str) -> str:
+    """Base name of a path without extension"""
+    return os.path.splitext(os.path.basename(for_file))[0]
 
 def is_reference_name(reference: str) -> bool:
     """ Checks if a given reference is a valid reference name

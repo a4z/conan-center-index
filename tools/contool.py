@@ -36,30 +36,28 @@ def main(argv):
     subparser = parser.add_subparsers(
         help="The following subcommands are supported:")
 
-    create.Command.setup(subparser.add_parser(
-        "create",
-        help="Create given packages to given profiles"
-    ))
-    config.Command.setup(subparser.add_parser(
-        "config",
-        help="Install profiles and config"
-    ))
-    delete.Command.setup(subparser.add_parser(
-        "delete",
-        help="Delete packages (for give profiles (future/feature))"
-    ))
-    lock.Command.setup(subparser.add_parser(
-        "lock",
-        help="Creates lockfiles for a given conan file"
-    ))
-    lint.Command.setup(subparser.add_parser(
-        "lint",
-        help="Run lint tests with much more text and ed"
-    ))
-    upload.Command.setup(subparser.add_parser(
-        "upload",
-        help="Upload packages (for give profiles (future/feature))"
-    ))
+    def add_command(command, **kwargs):
+        command.setup(subparser.add_parser(
+            command.name(), **kwargs
+        ))
+    add_command(
+        create.Command,
+        help="Create given packages to given profiles")
+    add_command(
+        config.Command,
+        help="Install profiles and config")
+    add_command(
+        delete.Command,
+        help="Delete packages (for give profiles (future/feature))")
+    add_command(
+        lock.Command,
+        help="Creates lockfiles for a given conan file")
+    add_command(
+        lint.Command,
+        help="Run lint tests ...")
+    add_command(
+        upload.Command,
+        help="Upload packages (for give profiles (future/feature))")
 
     parsed_args, other_args = parser.parse_known_args(argv)
     if not hasattr(parsed_args, "func"):

@@ -17,6 +17,11 @@ on_error = dict(zip(on_error_choices, on_error_options))
 class Command(base.Command):
     """ Create command implementation of the base.Command ''protocol''"""
 
+    def name():
+        """ The name implementation of the base.Command ''protocol''"""
+        return helpers.mod_name(__file__)
+
+
     def setup(sub_cmd: argparse.ArgumentParser) -> argparse.ArgumentParser:
         """ The setup implementation of the base.Command ''protocol''"""
         sub_cmd.add_argument(
@@ -67,6 +72,7 @@ class Command(base.Command):
                 spr.report_command("", command)
             return True
         err_strategy = on_error.get(parsed_args.onerror)
+        print(err_strategy)
         result: spr.Result = spr.run(commands, err_strategy)
         for command in result.commands_ok:
             spr.report_command("OK:", command)

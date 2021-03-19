@@ -11,6 +11,14 @@ class Command(ABC):
 
     @staticmethod
     @abstractmethod
+    def name() -> str:
+        """Needs to return the sub command name
+            something like
+            return helpers.mod_name(__file__)
+        """
+
+    @staticmethod
+    @abstractmethod
     def setup(sub_cmd: argparse.ArgumentParser) -> None:
         """ The setup methode is supposed to add all command options
         and set the run methode as the _func_ attribute of the sub_cmd

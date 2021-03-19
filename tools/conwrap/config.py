@@ -4,7 +4,6 @@ Yes, it dependes very much on the path
 Note that those profiles are only needed for development of packages.
 For using packages, use lockfiles.
 """
-import os
 import sys
 import platform
 import pathlib
@@ -112,6 +111,11 @@ def list_configs() -> List[str]:
 
 class Command(base.Command):
     """ Config command implementation of the base.Command ''protocol''"""
+
+    @staticmethod
+    def name():
+        """ The name implementation of the base.Command ''protocol''"""
+        return helpers.mod_name(__file__)
 
     @staticmethod
     def setup(sub_cmd: argparse.ArgumentParser) -> argparse.ArgumentParser:
