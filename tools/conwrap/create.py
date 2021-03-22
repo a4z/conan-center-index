@@ -10,7 +10,7 @@ from sprun import spr
 from . import helpers
 from . import base
 
-on_error_choices = ['ask', 'exit', 'continue']
+on_error_choices = ['ask', 'stop', 'continue']
 on_error_options = [spr.Proceed.ASK, spr.Proceed.STOP, spr.Proceed.CONTINUE]
 on_error = dict(zip(on_error_choices, on_error_options))
 
