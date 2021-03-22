@@ -135,7 +135,7 @@ class Command(base.Command):
     @staticmethod
     def run(parsed_args: argparse.Namespace, other_args: List[str]):
         """ The run implementation of the base.Command ''protocol''"""
-        if parsed_args.print_only:
+        if getattr(parsed_args, 'print_only', None):
             print("Print only")
 
         if parsed_args.list:
