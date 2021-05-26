@@ -138,5 +138,8 @@ class DjinniSuppotLib(ConanFile):
         cmake.install()
         self.copy("LICENSE", dst="licenses", src=self._source_subfolder)
 
+    def package_id(self):
+        del self.options.target
+
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
